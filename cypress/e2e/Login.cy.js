@@ -1,16 +1,95 @@
 import { Page } from "../support/page"
+import { login_assertion } from "../fixtures/login_assertion"
  
 describe('Login', () => {
   beforeEach('Open Login Page', () => {
     cy.visit('/')
   })
-  it('Login With Valid Credentials', () => {
+  it('01 - Login dengan kredensial valid', () => {
     Page.login.id(Cypress.env('ID'))
     Page.login.buttonLanjut()
-    Page.login.id(Cypress.env('EMAIL'))
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.email(Cypress.env('EMAIL'))
     Page.login.password(Cypress.env('PASSWORD'))
     Page.login.buttonLanjut()
-
-    
+  })  
+  it('02 - Login dengan format email tidak valid', () => {
+    Page.login.id(Cypress.env('ID'))
+    Page.login.buttonLanjut()
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.email(Cypress.env('INVALID_EMAIL'))
+    Page.login.password(Cypress.env('PASSWORD'))
+    Page.login.buttonLanjut()
+    cy.contains(login_assertion.invalid_email).should('be.visible')
   })
+  it('03 - Login dengan password salah', () => {
+    Page.login.id(Cypress.env('ID'))
+    Page.login.buttonLanjut()
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.email(Cypress.env('EMAIL'))
+    Page.login.password(Cypress.env('INVALID_PASSWORD'))
+    Page.login.buttonLanjut()
+    cy.contains(login_assertion.invalid_password).should('be.visible')
+  })
+  it('04 - Login dengan field kosong', () => {
+    Page.login.id(Cypress.env('ID'))
+    Page.login.buttonLanjut()
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.buttonLanjut()
+    cy.contains(login_assertion.field_kosong).should('be.visible')
+  })
+  it('05 - Login tanpa mengisi password', () => {
+    Page.login.id(Cypress.env('ID'))
+    Page.login.buttonLanjut()
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.email(Cypress.env('EMAIL'))
+    Page.login.buttonLanjut()
+    cy.contains(login_assertion.field_kosong).should('be.visible')
+  })
+  it('06 - Login tanpa mengisi email', () => {
+    Page.login.id(Cypress.env('ID'))
+    Page.login.buttonLanjut()
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.password(Cypress.env('PASSWORD'))
+    Page.login.buttonLanjut()
+    cy.contains(login_assertion.field_kosong).should('be.visible')
+  })
+  it('07 - Login dengan email huruf kapital', () => {
+    Page.login.id(Cypress.env('ID'))
+    Page.login.buttonLanjut()
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.email(Cypress.env('EMAIL_KAPITAL'))
+    Page.login.password(Cypress.env('PASSWORD'))
+    Page.login.buttonLanjut()
+    cy.contains(login_assertion.email_capital).should('be.visible')
+  })  
+  it('08 - Salah input email/password > 5 kali', () => {
+    Page.login.id(Cypress.env('ID'))
+    Page.login.buttonLanjut()
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.email(Cypress.env('SQL_INJECTION'))
+    Page.login.password(Cypress.env('PASSWORD'))
+    for (let i = 0; i < 5; i++) {
+        Page.login.buttonLanjut()
+    }
+    cy.contains(login_assertion.invalid_email).should('be.visible')
+  }) 
+  it('09 - SQL Injection pada field login', () => {
+    Page.login.id(Cypress.env('ID'))
+    Page.login.buttonLanjut()
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.email(Cypress.env('SQL_INJECTION'))
+    Page.login.password(Cypress.env('PASSWORD'))
+    Page.login.buttonLanjut()
+    cy.contains(login_assertion.invalid_email).should('be.visible')
+  }) 
+  it('10 - XSS Injection pada field login', () => {
+    Page.login.id(Cypress.env('ID'))
+    Page.login.buttonLanjut()
+    Page.login.Element_Assertion().usernameTitle.should('be.visible')
+    Page.login.email(Cypress.env('XSS'))
+    Page.login.password('dummy')
+    Page.login.buttonLanjut()
+    cy.contains(login_assertion.invalid_password).should('be.visible')
+  })         
 })
